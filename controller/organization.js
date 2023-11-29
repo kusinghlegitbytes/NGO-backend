@@ -32,7 +32,7 @@ exports.getNGO= async (req, res, next)=>{
 exports.createNGO= async (req, res, next)=>{
     try{
         const existingNGO=await Organization.findOne({email:req.body.email})
-        if(existingNGO){
+        if(existingNGO || existingNGO.phone===req.body.phone){
             return res.status(400).json({success:false, error:'Failed to create', message:"NGO already registered"})
         }
         let organization=new Organization(req.body)
