@@ -14,15 +14,21 @@ const ngoSchema=new mongoose.Schema({
     },
     email:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     }, 
     phone:{
-        type:Number,
-        required:true
+        type:String,
+        required:true,
+        unique:true
     },
     user:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"user"
+    },
+    image:{
+        type:Buffer,
+        contentType: String
     }
 })
 const Organization=mongoose.model('ngo', ngoSchema)

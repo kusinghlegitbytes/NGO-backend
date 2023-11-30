@@ -3,6 +3,8 @@ exports.getNGOs=async (req, res, next)=>{
     try{
         const ngos=await Organization.find()
         const noOfRecords=ngos.length
+        console.log(ngos)
+        console.log(noOfRecords)
         res.status(200).json({
             success:true,
             message:"NGOs List",
@@ -30,16 +32,32 @@ exports.getNGO= async (req, res, next)=>{
     }
 }
 exports.createNGO= async (req, res, next)=>{
+    const email=req.body.email
+    const phone=req.body.phone
+    const address=req.body.address
+    const description=req.body.description
+    const name=req.body.name
+    const image=req.files[0]
     try{
-        const existingNGO=await Organization.findOne({email:req.body.email})
-        if(existingNGO || existingNGO.phone===req.body.phone){
-            return res.status(400).json({success:false, error:'Failed to create', message:"NGO already registered"})
-        }
-        let organization=new Organization(req.body)
+        const imageBuffer = image.buffer;
+        let organization=new Organization({name, email, phone, address, description, image:imageBuffer})
         organization=await organization.save() 
-        res.status(200).json({success:true, message:'NGO created successfully', data:organization})
+        const data={
+            name:organization.name,
+            email:organization.email,
+            phone:organization.phone,
+            address:organization.address,
+            description:organization.description,
+            image:organization.image.toString('base64')
+        }
+        res.status(200).json({success:true, message:'NGO created successfully', data:data})
     }catch(err){
-        res.status(424).json({success:false, message:'Failed to create NGO', error:err})
+        console.log(err.code)
+        if(err.code===11000){
+            return res.status(409).json({success:false, message:'NGO already registered with us', error:"Failed to create"})
+        }
+        return res.status(500).json({success:false, message:"Internal Server Error", error:err})
+        
     }
 }
 exports.updateNGO=(req, res, next)=>{
