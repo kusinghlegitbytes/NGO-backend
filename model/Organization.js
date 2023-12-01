@@ -5,7 +5,7 @@ const ngoSchema=new mongoose.Schema({
         required:true
     },
     address:{
-        type:String, 
+        type:String,
         required:true
     },
     description:{
@@ -25,10 +25,6 @@ const ngoSchema=new mongoose.Schema({
     user:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"user"
-    },
-    image:{
-        type:Buffer,
-        contentType: String
     }
 })
 const Organization=mongoose.model('ngo', ngoSchema)

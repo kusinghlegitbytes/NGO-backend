@@ -20,6 +20,7 @@ exports.createUser= async (req, res, next)=>{
 }
 exports.loginUser=async(req, res, next)=>{
     try{
+        console.log("====================== called")
         let password=req.body.password
        let email=req.body.email
         user=await User.find({email})
