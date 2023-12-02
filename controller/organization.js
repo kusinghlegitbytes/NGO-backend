@@ -1,7 +1,7 @@
 const Organization=require("../model/Organization")
 exports.getNGOs=async (req, res, next)=>{
     try{
-        const ngos=await Organization.find()
+        const ngos=await Organization.find().populate('user')
         const noOfRecords=ngos.length
         console.log(ngos)
         console.log(noOfRecords)
@@ -37,17 +37,11 @@ exports.createNGO= async (req, res, next)=>{
     const address=req.body.address
     const description=req.body.description
     const name=req.body.name
+    const user=req.userID
     try{
-        let organization=new Organization({name, email, phone, address, description})
+        let organization=new Organization({name, email, phone, address, description, user})
         organization=await organization.save() 
-        const data={
-            name:organization.name,
-            email:organization.email,
-            phone:organization.phone,
-            address:organization.address,
-            description:organization.description,
-        }
-        res.status(200).json({success:true, message:'NGO created successfully', data:data})
+        res.status(200).json({success:true, message:'NGO created successfully', data:organization})
     }catch(err){
         console.log(err.code)
         if(err.code===11000){
@@ -59,17 +53,26 @@ exports.createNGO= async (req, res, next)=>{
 exports.updateNGO=async (req, res, next)=>{
     try{
         const id=req.params.id
-        const data=req.body
+        let data=req.body
+        const user=req.userID
+        data={...data, user:user}
         const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
         return res.status(200).json({success:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
         return res.status(500).json({sucess:false, message:"Failed to update", error:"Internal server error"})
     }
 }
-exports.deleteNGO=(req, res, next)=>{
+exports.deleteNGO=async (req, res, next)=>{
     try{
-        
+       const id=req.params.id
+       const result=await Organization.findByIdAndDelete(id)
+       console.log(result, "=========")
+       if(!result){
+        return res.status(404).json({success:false, message:"NGO does not exist", error:"Failed to delete"})
+       }
+       return res.status(200).json({success:true, message:"NGO deleted successfully"})
     }catch(err){
-        
+        console.log(err)
+        return res.status(500).json({success:false, error:"Failed to delete", message:"Internal server error"})
     }
 }
