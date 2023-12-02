@@ -100,8 +100,29 @@ exports.updateUser=async (req, res, next)=>{
     }
 }
 exports.deleteUser=async (req, res, next)=>{
-    res.status(200).json({status:true})
+    try{
+        const userId=req.userID
+        const existingUser=await User.findById(userId)
+        if(!existingUser){
+            return res.status(404).json({status:false, message:"Failed to delete", error:"User not found"})
+        }
+        const deletedUser=await User.findByIdAndDelete(userId)
+        return res.status(200).json({status:true, message:"User deleted successfully", data:null})
+    }catch(err){
+        return res.staus(500).json({status:false, message:"Failed to delete", error:err})
+    }
 }
 exports.changeUserType=async (req, res, next)=>{
-    res.status(200).json({status:true})
+    try{
+        const userId=req.params.id
+        const body=req.body
+        const existingUser=await User.findById(userId)
+        if(!existingUser){
+            return res.status(404).json({status:false, message:"Failed to change user type", error:"User not found"})
+        }
+        const updatedUser=await User.findByIdAndUpdate(userId, body, {new:true}).select("-password")
+        return res.status(200).json({status:true, message:"User type changed successfully", data:updatedUser})
+    }catch(err){
+        res.status(500).json({status:false, message:"Failed to change user type", error:err})
+    }
 }
