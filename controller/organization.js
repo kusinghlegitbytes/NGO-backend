@@ -6,14 +6,14 @@ exports.getNGOs=async (req, res, next)=>{
         console.log(ngos)
         console.log(noOfRecords)
         res.status(200).json({
-            success:true,
+            status:true,
             message:"NGOs List",
             data:ngos,
             noOfRecords:noOfRecords
         })
     }catch(err){
         res.status(500).json({
-            success:false,
+            status:false,
             message:"Internal server error",
             error:err
         })    
@@ -24,11 +24,11 @@ exports.getNGO= async (req, res, next)=>{
         const id=req.params.id
         let organization=await Organization.findById(id)
         if(!organization){
-            res.status(404).json({success:false, message:"NGO not found", data:null})
+            res.status(404).json({status:false, message:"NGO not found", data:null})
         }
-        res.status(200).json({success:true, message:'NGO fetched successfully', data:organization})
+        res.status(200).json({status:true, message:'NGO fetched successfully', data:organization})
     }catch(err){
-        res.status(404).json({success:false, message:'Failed to fetch NGO', error:err})
+        res.status(404).json({status:false, message:'Failed to fetch NGO', error:err})
     }
 }
 exports.createNGO= async (req, res, next)=>{
@@ -41,13 +41,13 @@ exports.createNGO= async (req, res, next)=>{
     try{
         let organization=new Organization({name, email, phone, address, description, user})
         organization=await organization.save() 
-        res.status(200).json({success:true, message:'NGO created successfully', data:organization})
+        res.status(200).json({status:true, message:'NGO created successfully', data:organization})
     }catch(err){
         console.log(err.code)
         if(err.code===11000){
-            return res.status(409).json({success:false, message:'Phone number and email already registered', error:"Already registered"})
+            return res.status(409).json({status:false, message:'Phone number and email already registered', error:"Already registered"})
         }
-        return res.status(500).json({success:false, message:"Internal Server Error", error:err})
+        return res.status(500).json({status:false, message:"Internal Server Error", error:err})
     }
 }
 exports.updateNGO=async (req, res, next)=>{
@@ -57,9 +57,9 @@ exports.updateNGO=async (req, res, next)=>{
         const user=req.userID
         data={...data, user:user}
         const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
-        return res.status(200).json({success:true, message:"NGO updated successfully", data:updatedNGO})
+        return res.status(200).json({status:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
-        return res.status(500).json({sucess:false, message:"Failed to update", error:"Internal server error"})
+        return res.status(500).json({status:false, message:"Failed to update", error:"Internal server error"})
     }
 }
 exports.deleteNGO=async (req, res, next)=>{
@@ -68,11 +68,11 @@ exports.deleteNGO=async (req, res, next)=>{
        const result=await Organization.findByIdAndDelete(id)
        console.log(result, "=========")
        if(!result){
-        return res.status(404).json({success:false, message:"NGO does not exist", error:"Failed to delete"})
+        return res.status(404).json({status:false, message:"NGO does not exist", error:"Failed to delete"})
        }
-       return res.status(200).json({success:true, message:"NGO deleted successfully"})
+       return res.status(200).json({status:true, message:"NGO deleted successfully"})
     }catch(err){
         console.log(err)
-        return res.status(500).json({success:false, error:"Failed to delete", message:"Internal server error"})
+        return res.status(500).json({status:false, error:"Failed to delete", message:"Internal server error"})
     }
 }
