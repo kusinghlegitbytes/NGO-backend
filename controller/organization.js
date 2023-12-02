@@ -1,36 +1,55 @@
 const Organization=require("../model/Organization")
-exports.getNGOs=async (req, res, next)=>{
-    try{
-        const ngos=await Organization.find().populate('user')
-        const noOfRecords=ngos.length
-        console.log(ngos)
-        console.log(noOfRecords)
+exports.getNGOs = async (req, res, next) => {
+    try {
+        const ngos = await Organization.find().populate('user');
+        const ngosWithoutPassword = ngos.map(ngo => ({
+            ...ngo.toObject(),
+            user: { 
+                ...ngo.user.toObject(),
+                password: undefined
+            }
+        }));
+
+        const noOfRecords = ngosWithoutPassword.length;
+        console.log(ngosWithoutPassword);
+        console.log(noOfRecords);
+
         res.status(200).json({
-            status:true,
-            message:"NGOs List",
-            data:ngos,
-            noOfRecords:noOfRecords
-        })
-    }catch(err){
+            status: true,
+            message: "NGOs List",
+            data: ngosWithoutPassword,
+            noOfRecords: noOfRecords
+        });
+    } catch (err) {
         res.status(500).json({
-            status:false,
-            message:"Internal server error",
-            error:err
-        })    
+            status: false,
+            message: "Internal server error",
+            error: err
+        });
     }
-}
-exports.getNGO= async (req, res, next)=>{
-    try{
-        const id=req.params.id
-        let organization=await Organization.findById(id)
-        if(!organization){
-            res.status(404).json({status:false, message:"NGO not found", data:null})
+};
+
+exports.getNGO = async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        let organization = await Organization.findById(id).populate('user');
+        if (!organization) {
+            return res.status(404).json({ status: false, message: 'NGO not found', data: null });
         }
-        res.status(200).json({status:true, message:'NGO fetched successfully', data:organization})
-    }catch(err){
-        res.status(404).json({status:false, message:'Failed to fetch NGO', error:err})
+        const organizationWithoutPassword = {
+            ...organization.toObject(),
+            user: {
+                ...organization.user.toObject(),
+                password: undefined
+            }
+        };
+
+        res.status(200).json({ status: true, message: 'NGO fetched successfully', data: organizationWithoutPassword });
+    } catch (err) {
+        res.status(500).json({ status: false, message: 'Failed to fetch NGO', error: err });
     }
-}
+};
+
 exports.createNGO= async (req, res, next)=>{
     const email=req.body.email
     const phone=req.body.phone
@@ -54,11 +73,15 @@ exports.updateNGO=async (req, res, next)=>{
     try{
         const id=req.params.id
         let data=req.body
-        const user=req.userID
-        data={...data, user:user}
+        // const user=req.userID
+        // data={...data, user:user}
         const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
         return res.status(200).json({status:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
+        console.log(err)
+        if(err.code===11000){
+            return res.status(409).json({status:false, message:'Phone number or email already used', error:"Failed to update"})
+        }
         return res.status(500).json({status:false, message:"Failed to update", error:"Internal server error"})
     }
 }
