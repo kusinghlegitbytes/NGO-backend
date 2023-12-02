@@ -2,11 +2,6 @@ const User=require("../model/User")
 const {generateToken}=require("../util/token")
 exports.createUser= async (req, res, next)=>{
     try{
-        let existingUser=await User.find({email:req.body.email})
-        existingUser=existingUser[0]
-        if(existingUser){
-            return res.status(400).json({status:false, message:"User already exist"})
-        }
         let user=new User(req.body)
         user=await user.save()
         user=user.toObject()
@@ -14,13 +9,14 @@ exports.createUser= async (req, res, next)=>{
         const token=generateToken({id:user._id})
         res.status(200).json({status:true, message:'User created successfully', data:{user, accessToken:token}})
     }catch(err){
-        console.log(err)
-        res.status(424).json({status:false, message:'Failed to create User', error:err})
+        if(err.code===11000){
+            return res.status(409).json({status:false, message:'Phone number and email already registered', error:"Already registered"})
+        }
+        res.status(500).json({status:false, message:'Internal Server Error', error:err})
     }
 }
 exports.loginUser=async(req, res, next)=>{
     try{
-        console.log("====================== called")
         let password=req.body.password
        let email=req.body.email
         user=await User.find({email})
@@ -52,7 +48,7 @@ exports.loginUser=async(req, res, next)=>{
             });
         })
     }catch(err){
-        console.log(err)
+        res.status(500).json({status:false, message:'Internal Server Error', error:err})
     }
 }
 exports.getUsers=async (req, res, next)=>{
@@ -78,7 +74,7 @@ exports.getUser= async (req, res, next)=>{
         const id=req.params.id
         let user=await User.findById(id).select("-password")
         if(!user){
-            res.status(404).json({status:false, message:"User not found", data:null})
+            return res.status(404).json({status:false, message:"User not found", data:null})
         }
         res.status(200).json({status:true, message:'User fetched successfully', data:user})
     }catch(err){
@@ -89,11 +85,12 @@ exports.updateUser=async (req, res, next)=>{
     try{
         const userID=req.userID
         const data=req.body
-        const existingUser=await User.findById(userID)
+        const id=req.params.id
+        const existingUser=await User.findById(id)
         if(!existingUser){
             return res.status(404).json({status:false, error:"User not found", message:"Failed to updated"})
         }
-        const updatedUser=await User.findByIdAndUpdate(userID, data, {new:true}).select("-password")
+        const updatedUser=await User.findByIdAndUpdate(id, data, {new:true}).select("-password")
         return res.status(200).json({status:false, message:"User updated successfully", data:updatedUser})
     }catch(err){
         res.staus(500).json({status:false, message:"Failed to update", error:err})
@@ -102,11 +99,12 @@ exports.updateUser=async (req, res, next)=>{
 exports.deleteUser=async (req, res, next)=>{
     try{
         const userId=req.userID
-        const existingUser=await User.findById(userId)
+        const id=req.params.id
+        const existingUser=await User.findById(id)
         if(!existingUser){
             return res.status(404).json({status:false, message:"Failed to delete", error:"User not found"})
         }
-        const deletedUser=await User.findByIdAndDelete(userId)
+        const deletedUser=await User.findByIdAndDelete(id)
         return res.status(200).json({status:true, message:"User deleted successfully", data:null})
     }catch(err){
         return res.staus(500).json({status:false, message:"Failed to delete", error:err})
