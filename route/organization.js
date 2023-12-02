@@ -5,6 +5,6 @@ const {getNGOs, getNGO, createNGO, updateNGO, deleteNGO}=require("../controller/
 router.get("/", getNGOs)
 router.get("/:id", getNGO)
 router.post("/", isAuth, upload.any(), createNGO)
-router.put("/:id", updateNGO)
-router.delete("/:id", deleteNGO)
+router.put("/:id", isAuth, updateNGO)
+router.delete("/:id", isAuth, deleteNGO)
 module.exports=router

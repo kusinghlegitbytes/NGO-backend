@@ -56,17 +56,19 @@ exports.createNGO= async (req, res, next)=>{
         return res.status(500).json({success:false, message:"Internal Server Error", error:err})
     }
 }
-exports.updateNGO=(req, res, next)=>{
+exports.updateNGO=async (req, res, next)=>{
     try{
         const id=req.params.id
         const data=req.body
+        const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
+        return res.status(200).json({success:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
-        
+        return res.status(500).json({sucess:false, message:"Failed to update", error:"Internal server error"})
     }
 }
 exports.deleteNGO=(req, res, next)=>{
     try{
-
+        
     }catch(err){
         
     }
