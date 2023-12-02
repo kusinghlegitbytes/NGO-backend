@@ -40,11 +40,11 @@ exports.loginUser=async(req, res, next)=>{
             }
             user=user.toObject()
             delete user.password
-            const token=generateToken({id:user._id})
+            const accessToken=generateToken({id:user._id})
             res.status(200).json({
                 status: true,
                 message: "Login successful",
-                data: {user, token}
+                data: {user, accessToken}
             });
         })
     }catch(err){

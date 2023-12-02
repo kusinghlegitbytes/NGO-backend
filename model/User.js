@@ -28,13 +28,7 @@ const userSchema=new mongoose.Schema({
         type:Number,
         required:true,
         unique:true
-    },
-    ngosList: {
-        type: [{ 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'ngo' 
-        }]
-    },
+    }
 })
 userSchema.pre("save", function(next){
     let user=this

@@ -26,6 +26,10 @@ const ngoSchema=new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"user",
         required:true
+    },
+    views:{
+        type:Number,
+        default:0
     }
 })
 const Organization=mongoose.model('ngo', ngoSchema)

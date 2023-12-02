@@ -36,6 +36,8 @@ exports.getNGO = async (req, res, next) => {
         if (!organization) {
             return res.status(404).json({ status: false, message: 'NGO not found', data: null });
         }
+        organization.views=organization.views+1
+        await organization.save()
         const organizationWithoutPassword = {
             ...organization.toObject(),
             user: {
@@ -89,7 +91,6 @@ exports.deleteNGO=async (req, res, next)=>{
     try{
        const id=req.params.id
        const result=await Organization.findByIdAndDelete(id)
-       console.log(result, "=========")
        if(!result){
         return res.status(404).json({status:false, message:"NGO does not exist", error:"Failed to delete"})
        }
