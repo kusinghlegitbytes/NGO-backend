@@ -5,8 +5,18 @@ const ngoSchema=new mongoose.Schema({
         required:true
     },
     address:{
-        type:String,
-        required:true
+        completeAddress:{
+            type:String,
+            required:true
+        },
+        longitude:{
+            type:Number,
+            required:true
+        },
+        latitude:{
+            type:Number,
+            required:true
+        }
     },
     description:{
         type:String,
