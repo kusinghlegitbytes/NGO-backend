@@ -4,8 +4,12 @@ exports.isAuth= async (req, res, next)=>{
     try {
         const result = await verifyToken(token);
         req.userID=result.id
+        console.log(result, "====")
         next()
     } catch (err) {
-        return res.status(500).json({ success: err.status, error: 'Not Authorized', message:"Unauthorized Access" });
+        if(err.error==="jwt expired"){
+            return res.status(403).json({ status: false, error: err.error, message:"Unauthorized Access" })
+        }
+        return res.status(500).json({ status: false, error: err, message:"Internal Server Error" });
     }
 }
