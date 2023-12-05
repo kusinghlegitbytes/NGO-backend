@@ -2,6 +2,7 @@ const User=require("../model/User")
 const {generateToken}=require("../util/token")
 exports.createUser= async (req, res, next)=>{
     try{
+        console.log(req.body, "============")
         let user=new User(req.body)
         user=await user.save()
         user=user.toObject()
@@ -91,7 +92,7 @@ exports.updateUser=async (req, res, next)=>{
             return res.status(404).json({status:false, error:"User not found", message:"Failed to updated"})
         }
         const updatedUser=await User.findByIdAndUpdate(id, data, {new:true}).select("-password")
-        return res.status(200).json({status:false, message:"User updated successfully", data:updatedUser})
+        return res.status(200).json({status:true, message:"User updated successfully", data:updatedUser})
     }catch(err){
         res.staus(500).json({status:false, message:"Failed to update", error:err})
     }

@@ -2,17 +2,18 @@ const Organization=require("../model/Organization")
 exports.getNGOs = async (req, res, next) => {
     try {
         const ngos = await Organization.find().populate('user');
-        const ngosWithoutPassword = ngos.map(ngo => ({
+        const ngosWithoutPassword = ngos.map(ngo => {
+            console.log(ngo.toObject())
+            return ({
             ...ngo.toObject(),
             user: { 
                 ...ngo.user.toObject(),
                 password: undefined
             }
-        }));
+        })});
+        console.log(ngos)
 
         const noOfRecords = ngosWithoutPassword.length;
-        console.log(ngosWithoutPassword);
-        console.log(noOfRecords);
 
         res.status(200).json({
             status: true,
@@ -21,6 +22,7 @@ exports.getNGOs = async (req, res, next) => {
             noOfRecords: noOfRecords
         });
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             status: false,
             message: "Internal server error",
@@ -75,9 +77,11 @@ exports.updateNGO=async (req, res, next)=>{
     try{
         const id=req.params.id
         let data=req.body
-        // const user=req.userID
-        // data={...data, user:user}
-        const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
+        const user=req.userID
+        console.log(id, "=============")
+        data={...data, user:user}
+        console.log(data, "updated ngo data")
+        const updatedNGO=await Organization.findByIdAndUpdate("656ae03a967fd2e8aab983d0", data, {new:true})
         return res.status(200).json({status:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
         console.log(err)
@@ -98,5 +102,14 @@ exports.deleteNGO=async (req, res, next)=>{
     }catch(err){
         console.log(err)
         return res.status(500).json({status:false, error:"Failed to delete", message:"Internal server error"})
+    }
+}
+exports.getNGOsByUser=async (req, res, next)=>{
+    try{
+        const userId=req.params.id
+        const ngos=await Organization.find({user:userId})
+        return res.status(200).json({status:true, message:"NGOs added by user fetched", data:ngos})
+    }catch(err){
+        return res.status(500).json({status:false, message:"Internal Server Error", error:err})
     }
 }
