@@ -3,7 +3,6 @@ exports.getNGOs = async (req, res, next) => {
     try {
         const ngos = await Organization.find().populate('user');
         const ngosWithoutPassword = ngos.map(ngo => {
-            console.log(ngo.toObject())
             return ({
             ...ngo.toObject(),
             user: { 
@@ -11,7 +10,6 @@ exports.getNGOs = async (req, res, next) => {
                 password: undefined
             }
         })});
-        console.log(ngos)
 
         const noOfRecords = ngosWithoutPassword.length;
 
@@ -78,10 +76,11 @@ exports.updateNGO=async (req, res, next)=>{
         const id=req.params.id
         let data=req.body
         const user=req.userID
-        console.log(id, "=============")
+        console.log(id, "  ngo id")
+        console.log(user, "  edited by user")
+        console.log(req.body, " req body")
         data={...data, user:user}
-        console.log(data, "updated ngo data")
-        const updatedNGO=await Organization.findByIdAndUpdate("656ae03a967fd2e8aab983d0", data, {new:true})
+        const updatedNGO=await Organization.findByIdAndUpdate(id, data, {new:true})
         return res.status(200).json({status:true, message:"NGO updated successfully", data:updatedNGO})
     }catch(err){
         console.log(err)

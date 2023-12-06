@@ -4,7 +4,6 @@ exports.isAuth= async (req, res, next)=>{
     try {
         const result = await verifyToken(token);
         req.userID=result.id
-        console.log(result, "====")
         next()
     } catch (err) {
         if(err.error==="jwt expired"){

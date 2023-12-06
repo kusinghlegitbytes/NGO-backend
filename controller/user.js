@@ -1,8 +1,8 @@
 const User=require("../model/User")
 const {generateToken}=require("../util/token")
+const Organization=require("../model/Organization")
 exports.createUser= async (req, res, next)=>{
     try{
-        console.log(req.body, "============")
         let user=new User(req.body)
         user=await user.save()
         user=user.toObject()
@@ -94,7 +94,7 @@ exports.updateUser=async (req, res, next)=>{
         const updatedUser=await User.findByIdAndUpdate(id, data, {new:true}).select("-password")
         return res.status(200).json({status:true, message:"User updated successfully", data:updatedUser})
     }catch(err){
-        res.staus(500).json({status:false, message:"Failed to update", error:err})
+        res.status(500).json({status:false, message:"Failed to update", error:err})
     }
 }
 exports.deleteUser=async (req, res, next)=>{
@@ -105,10 +105,17 @@ exports.deleteUser=async (req, res, next)=>{
         if(!existingUser){
             return res.status(404).json({status:false, message:"Failed to delete", error:"User not found"})
         }
+        const ngosByUser=await Organization.find({user:userId})
+        if(ngosByUser.length>0){
+            for (const ngo of ngosByUser) {
+                console.log(ngo._id)
+                await Organization.findByIdAndDelete(ngo._id);
+            }
+        }
         const deletedUser=await User.findByIdAndDelete(id)
         return res.status(200).json({status:true, message:"User deleted successfully", data:null})
     }catch(err){
-        return res.staus(500).json({status:false, message:"Failed to delete", error:err})
+        return res.status(500).json({status:false, message:"Failed to delete", error:err})
     }
 }
 exports.changeUserType=async (req, res, next)=>{
